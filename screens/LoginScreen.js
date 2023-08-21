@@ -7,7 +7,7 @@ import {
   TextInput,
   Pressable,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
 import { AntDesign } from "@expo/vector-icons";
@@ -20,13 +20,27 @@ const LoginScreen = () => {
   const [password, setPassword] = useState("");
   const navigation = useNavigation();
 
+  useEffect(() => {
+    const checkLoginStatus = async () => {
+      try {
+        const token = await AsyncStorage.getItem("authToken");
+        if (token) {
+          navigation.replace("Main");
+        }
+      } catch (error) {
+        console.log("Error Msg:", error);
+      }
+    };
+    checkLoginStatus();
+  }, []);
+
   const handleLogin = async () => {
     const userData = { email, password };
     try {
       const res = await axios.post("http://192.168.0.102:8000/login", userData);
       const token = res.data.token;
       AsyncStorage.setItem("authToken", token);
-      navigation.replace("Home");
+      navigation.replace("Main");
     } catch (error) {
       Alert.alert("Login Error", `${error.message}`);
       console.log("Login failed", error);
